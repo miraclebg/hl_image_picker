@@ -66,8 +66,10 @@ class ImageFileCompressEngine(
                     val file = File(imageDirectory, fileName)
 
                     context.contentResolver.openOutputStream(Uri.fromFile(file)).use { os ->
-                        val compressQuality = ((quality ?: 0.9) * 100).toInt()
-                        bitmap.compress(compressFormat, compressQuality, os)
+                        if (os != null) {
+                            val compressQuality = ((quality ?: 0.9) * 100).toInt()
+                            bitmap.compress(compressFormat, compressQuality, os)
+                        }
                     }
 
                     setOrientation(file, originalOrientation)
