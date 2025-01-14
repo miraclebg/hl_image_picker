@@ -22,7 +22,7 @@ import androidx.annotation.IntDef;
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 
-import com.howl.hl_image_picker.R;;
+import com.howl.hl_image_picker.R;
 import com.yalantis.ucrop.callback.OverlayViewChangeListener;
 import com.yalantis.ucrop.util.DensityUtil;
 import com.yalantis.ucrop.util.RectUtils;
@@ -128,6 +128,9 @@ public class OverlayView extends View {
         this.isDragCenter = isDragCenter;
     }
 
+    /**
+     * @noinspection DeprecatedIsStillUsed
+     */
     @Deprecated
     /***
      * Please use the new method {@link #setFreestyleCropMode setFreestyleCropMode} method as we have more than 1 freestyle crop mode.
@@ -323,7 +326,7 @@ public class OverlayView extends View {
      * Along with image there are dimmed layer, crop bounds and crop guidelines that must be drawn.
      */
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
         drawDimmedLayer(canvas);
         drawCropGrid(canvas);
@@ -557,7 +560,6 @@ public class OverlayView extends View {
      * This method extracts all needed values from the styled attributes.
      * Those are used to configure the view.
      */
-    @SuppressWarnings("deprecation")
     protected void processStyledAttributes(@NonNull TypedArray a) {
         mCircleDimmedLayer = a.getBoolean(R.styleable.ucrop_UCropView_ucrop_circle_dimmed_layer, DEFAULT_CIRCLE_DIMMED_LAYER);
         mDimmedColor = a.getColor(R.styleable.ucrop_UCropView_ucrop_dimmed_color,
@@ -576,7 +578,6 @@ public class OverlayView extends View {
     /**
      * This method setups Paint object for the crop bounds.
      */
-    @SuppressWarnings("deprecation")
     private void initCropFrameStyle(@NonNull TypedArray a) {
         int cropFrameStrokeSize = a.getDimensionPixelSize(R.styleable.ucrop_UCropView_ucrop_frame_stroke_size,
                 getResources().getDimensionPixelSize(R.dimen.ucrop_default_crop_frame_stoke_width));
@@ -594,7 +595,6 @@ public class OverlayView extends View {
     /**
      * This method setups Paint object for the crop guidelines.
      */
-    @SuppressWarnings("deprecation")
     private void initCropGridStyle(@NonNull TypedArray a) {
         int cropGridStrokeSize = a.getDimensionPixelSize(R.styleable.ucrop_UCropView_ucrop_grid_stroke_size,
                 getResources().getDimensionPixelSize(R.dimen.ucrop_default_crop_grid_stoke_width));
@@ -642,7 +642,7 @@ public class OverlayView extends View {
             float lastAnimationValue = 0f;
 
             @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
+            public void onAnimationUpdate(@NonNull ValueAnimator animation) {
                 float x = offsetX * (float) animation.getAnimatedValue();
                 float y = offsetY * (float) animation.getAnimatedValue();
                 mCropViewRect.set(new RectF(

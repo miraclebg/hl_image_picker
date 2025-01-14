@@ -51,9 +51,11 @@ public class ImmersiveManager {
                 if (isDarkStatusBarIcon) {
                     initBarBelowLOLLIPOP(baseActivity);
                 } else {
-                    window.setFlags(
-                            WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
-                            WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                        window.setFlags(
+                                WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
+                                WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+                    }
                 }
             } else {
                 if (isMarginStatusBar && isMarginNavigationBar) {
@@ -108,7 +110,9 @@ public class ImmersiveManager {
     private static void initBarBelowLOLLIPOP(Activity activity) {
         //透明状态栏
         Window mWindow = activity.getWindow();
-        mWindow.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            mWindow.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        }
         //创建一个假的状态栏
         setupStatusBarView(activity);
     }

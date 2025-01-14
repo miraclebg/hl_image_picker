@@ -45,6 +45,7 @@ import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * @author Peli
@@ -96,9 +97,12 @@ public class FileUtils {
                 return outputUri;
             } else {
                 String outputPath = FileUtils.isContent(outputUri.toString()) ? outputUri.toString() : outputUri.getPath();
-                int lastIndexOf = outputPath.lastIndexOf(".");
-                outputPath = outputPath.replace(outputPath.substring(lastIndexOf), postfix);
-                outputUri = FileUtils.isContent(outputPath) ? Uri.parse(outputPath) : Uri.fromFile(new File(outputPath));
+
+                if (outputPath != null) {
+                    int lastIndexOf = outputPath.lastIndexOf(".");
+                    outputPath = outputPath.replace(outputPath.substring(lastIndexOf), postfix);
+                    outputUri = FileUtils.isContent(outputPath) ? Uri.parse(outputPath) : Uri.fromFile(new File(outputPath));
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -232,7 +236,8 @@ public class FileUtils {
      */
     public static String getMimeTypeFromMediaContentUri(Context context, Uri uri) {
         String mimeType;
-        if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
+        String scheme = uri.getScheme();
+        if (scheme != null && scheme.equals(ContentResolver.SCHEME_CONTENT)) {
             ContentResolver cr = context.getContentResolver();
             mimeType = cr.getType(uri);
         } else {
@@ -245,6 +250,7 @@ public class FileUtils {
     }
 
 
+    @SuppressLint("SimpleDateFormat")
     private static final SimpleDateFormat sf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 
     public static String getCreateFileName(String prefix) {
@@ -371,10 +377,10 @@ public class FileUtils {
                 if (!TextUtils.isEmpty(id)) {
                     try {
                         final Uri contentUri = ContentUris.withAppendedId(
-                                Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+                                Uri.parse("content://downloads/public_downloads"), Long.parseLong(id));
                         return getDataColumn(context, contentUri, null, null);
                     } catch (NumberFormatException e) {
-                        Log.i(TAG, e.getMessage());
+                        Log.i(TAG, Objects.requireNonNull(e.getMessage()));
                         return null;
                     }
                 }
@@ -437,9 +443,12 @@ public class FileUtils {
 
         FileChannel outputChannel = null;
         FileChannel inputChannel = null;
+        //noinspection TryFinallyCanBeTryWithResources
         try {
-            inputChannel = new FileInputStream(new File(pathFrom)).getChannel();
-            outputChannel = new FileOutputStream(new File(pathTo)).getChannel();
+            //noinspection resource
+            inputChannel = new FileInputStream(pathFrom).getChannel();
+            //noinspection resource
+            outputChannel = new FileOutputStream(pathTo).getChannel();
             inputChannel.transferTo(0, inputChannel.size(), outputChannel);
         } finally {
             if (inputChannel != null) inputChannel.close();
@@ -464,6 +473,7 @@ public class FileUtils {
 
         InputStream isFrom = null;
         OutputStream osTo = null;
+        //noinspection TryFinallyCanBeTryWithResources
         try {
             isFrom = context.getContentResolver().openInputStream(uriFrom);
             osTo = context.getContentResolver().openOutputStream(uriTo);
@@ -487,9 +497,8 @@ public class FileUtils {
      *
      * @param is 文件输入流
      * @param os 文件输出流
-     * @return
      */
-    public static boolean writeFileFromIS(final InputStream is, final OutputStream os) {
+    public static void writeFileFromIS(final InputStream is, final OutputStream os) {
         OutputStream osBuffer = null;
         BufferedInputStream isBuffer = null;
         try {
@@ -500,10 +509,8 @@ public class FileUtils {
                 os.write(data, 0, len);
             }
             os.flush();
-            return true;
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
         } finally {
             close(isBuffer);
             close(osBuffer);

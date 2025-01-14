@@ -62,7 +62,7 @@ public class UCrop {
      * @param totalSource crop data source for list
      */
     public static UCrop of(@NonNull Uri source, @NonNull Uri destination, ArrayList<String> totalSource) {
-        if (totalSource == null || totalSource.size() <= 0) {
+        if (totalSource == null || totalSource.isEmpty()) {
             throw new IllegalArgumentException("Missing required parameters, count cannot be less than 1");
         }
         if (totalSource.size() == 1) {

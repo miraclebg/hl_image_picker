@@ -322,7 +322,7 @@ public class UCropActivity extends AppCompatActivity {
         mToolbarCancelDrawable = intent.getIntExtra(UCrop.Options.EXTRA_UCROP_WIDGET_CANCEL_DRAWABLE, R.drawable.ucrop_ic_cross);
         mToolbarCropDrawable = intent.getIntExtra(UCrop.Options.EXTRA_UCROP_WIDGET_CROP_DRAWABLE, R.drawable.ucrop_ic_done);
         mToolbarTitle = intent.getStringExtra(UCrop.Options.EXTRA_UCROP_TITLE_TEXT_TOOLBAR);
-        mToolbarTitleSize = intent.getIntExtra(UCrop.Options.EXTRA_UCROP_TITLE_TEXT_SIZE_TOOLBAR,18);
+        mToolbarTitleSize = intent.getIntExtra(UCrop.Options.EXTRA_UCROP_TITLE_TEXT_SIZE_TOOLBAR, 18);
         mToolbarTitle = mToolbarTitle != null ? mToolbarTitle : getResources().getString(R.string.ucrop_label_edit_photo);
         mLogoColor = intent.getIntExtra(UCrop.Options.EXTRA_UCROP_LOGO_COLOR, ContextCompat.getColor(this, R.color.ucrop_color_default_logo));
         mShowBottomControls = !intent.getBooleanExtra(UCrop.Options.EXTRA_HIDE_BOTTOM_CONTROLS, false);
@@ -460,12 +460,10 @@ public class UCropActivity extends AppCompatActivity {
      */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void setStatusBarColor(@ColorInt int color) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            final Window window = getWindow();
-            if (window != null) {
-                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-                window.setStatusBarColor(color);
-            }
+        final Window window = getWindow();
+        if (window != null) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(color);
         }
     }
 
@@ -506,16 +504,13 @@ public class UCropActivity extends AppCompatActivity {
         mCropAspectRatioViews.get(aspectRationSelectedByDefault).setSelected(true);
 
         for (ViewGroup cropAspectRatioView : mCropAspectRatioViews) {
-            cropAspectRatioView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mGestureCropImageView.setTargetAspectRatio(
-                            ((AspectRatioTextView) ((ViewGroup) v).getChildAt(0)).getAspectRatio(v.isSelected()));
-                    mGestureCropImageView.setImageToWrapCropBounds();
-                    if (!v.isSelected()) {
-                        for (ViewGroup cropAspectRatioView : mCropAspectRatioViews) {
-                            cropAspectRatioView.setSelected(cropAspectRatioView == v);
-                        }
+            cropAspectRatioView.setOnClickListener(v -> {
+                mGestureCropImageView.setTargetAspectRatio(
+                        ((AspectRatioTextView) ((ViewGroup) v).getChildAt(0)).getAspectRatio(v.isSelected()));
+                mGestureCropImageView.setImageToWrapCropBounds();
+                if (!v.isSelected()) {
+                    for (ViewGroup cropAspectRatioView1 : mCropAspectRatioViews) {
+                        cropAspectRatioView1.setSelected(cropAspectRatioView1 == v);
                     }
                 }
             });
@@ -545,18 +540,8 @@ public class UCropActivity extends AppCompatActivity {
         ((HorizontalProgressWheelView) findViewById(R.id.rotate_scroll_wheel)).setMiddleLineColor(mActiveControlsWidgetColor);
 
 
-        findViewById(R.id.wrapper_reset_rotate).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                resetRotation();
-            }
-        });
-        findViewById(R.id.wrapper_rotate_by_angle).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                rotateByAngle(90);
-            }
-        });
+        findViewById(R.id.wrapper_reset_rotate).setOnClickListener(v -> resetRotation());
+        findViewById(R.id.wrapper_rotate_by_angle).setOnClickListener(v -> rotateByAngle(90));
 
         setAngleTextColor(mActiveControlsWidgetColor);
     }
@@ -625,12 +610,9 @@ public class UCropActivity extends AppCompatActivity {
         mGestureCropImageView.setImageToWrapCropBounds();
     }
 
-    private final View.OnClickListener mStateClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (!v.isSelected()) {
-                setWidgetState(v.getId());
-            }
+    private final View.OnClickListener mStateClickListener = v -> {
+        if (!v.isSelected()) {
+            setWidgetState(v.getId());
         }
     };
 
@@ -669,7 +651,7 @@ public class UCropActivity extends AppCompatActivity {
     }
 
     private void changeSelectedTab(int stateViewId) {
-        TransitionManager.beginDelayedTransition((ViewGroup) findViewById(R.id.ucrop_photobox), mControlsTransition);
+        TransitionManager.beginDelayedTransition(findViewById(R.id.ucrop_photobox), mControlsTransition);
 
         mWrapperStateScale.findViewById(R.id.text_view_scale).setVisibility(stateViewId == R.id.state_scale ? View.VISIBLE : View.GONE);
         mWrapperStateAspectRatio.findViewById(R.id.text_view_crop).setVisibility(stateViewId == R.id.state_aspect_ratio ? View.VISIBLE : View.GONE);

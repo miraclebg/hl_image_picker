@@ -13,7 +13,7 @@ import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.howl.hl_image_picker.R;;
+import com.howl.hl_image_picker.R;
 import com.yalantis.ucrop.callback.BitmapCropCallback;
 import com.yalantis.ucrop.callback.CropBoundsChangeListener;
 import com.yalantis.ucrop.model.CropParameters;
@@ -352,7 +352,7 @@ public class CropImageView extends TransformImageView {
         float deltaRight = unrotatedImageRect.right - unrotatedCropRect.right;
         float deltaBottom = unrotatedImageRect.bottom - unrotatedCropRect.bottom;
 
-        float indents[] = new float[4];
+        float[] indents = new float[4];
         indents[0] = (deltaLeft > 0) ? deltaLeft : 0;
         indents[1] = (deltaTop > 0) ? deltaTop : 0;
         indents[2] = (deltaRight < 0) ? deltaRight : 0;
@@ -503,7 +503,6 @@ public class CropImageView extends TransformImageView {
      * This method extracts all needed values from the styled attributes.
      * Those are used to configure the view.
      */
-    @SuppressWarnings("deprecation")
     protected void processStyledAttributes(@NonNull TypedArray a) {
         float targetAspectRatioX = Math.abs(a.getFloat(R.styleable.ucrop_UCropView_ucrop_aspect_ratio_x, DEFAULT_ASPECT_RATIO));
         float targetAspectRatioY = Math.abs(a.getFloat(R.styleable.ucrop_UCropView_ucrop_aspect_ratio_y, DEFAULT_ASPECT_RATIO));

@@ -6,7 +6,7 @@ import android.os.Parcelable;
 import androidx.annotation.Nullable;
 
 /**
- * Created by Oleksii Shliama [https://github.com/shliama] on 6/24/16.
+ * Created by Oleksii Shliama [<a href="https://github.com/shliama">...</a>] on 6/24/16.
  */
 public class AspectRatio implements Parcelable {
 

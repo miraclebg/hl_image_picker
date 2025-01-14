@@ -15,18 +15,24 @@ class GlideEngine private constructor() : ImageEngine {
             return
         }
         Glide.with(context)
-                .load(url)
-                .into(imageView)
+            .load(url)
+            .into(imageView)
     }
 
-    override fun loadImage(context: Context, imageView: ImageView, url: String, maxWidth: Int, maxHeight: Int) {
+    override fun loadImage(
+        context: Context,
+        imageView: ImageView,
+        url: String,
+        maxWidth: Int,
+        maxHeight: Int
+    ) {
         if (!ActivityCompatHelper.assertValidRequest(context)) {
             return
         }
         Glide.with(context)
-                .load(url)
-                .override(maxWidth, maxHeight)
-                .into(imageView)
+            .load(url)
+            .override(maxWidth, maxHeight)
+            .into(imageView)
     }
 
     override fun loadAlbumCover(context: Context, url: String, imageView: ImageView) {
@@ -34,13 +40,13 @@ class GlideEngine private constructor() : ImageEngine {
             return
         }
         Glide.with(context)
-                .asBitmap()
-                .load(url)
-                .override(180, 180)
-                .sizeMultiplier(0.5f)
-                .transform(CenterCrop(), RoundedCorners(8))
-                .placeholder(PictureSelectorR.drawable.ps_image_placeholder)
-                .into(imageView)
+            .asBitmap()
+            .load(url)
+            .override(180, 180)
+            .sizeMultiplier(0.5f)
+            .transform(CenterCrop(), RoundedCorners(8))
+            .placeholder(PictureSelectorR.drawable.ps_image_placeholder)
+            .into(imageView)
     }
 
     override fun loadGridImage(context: Context, url: String, imageView: ImageView) {
@@ -48,11 +54,11 @@ class GlideEngine private constructor() : ImageEngine {
             return
         }
         Glide.with(context)
-                .load(url)
-                .override(200, 200)
-                .centerCrop()
-                .placeholder(PictureSelectorR.drawable.ps_image_placeholder)
-                .into(imageView)
+            .load(url)
+            .override(200, 200)
+            .centerCrop()
+            .placeholder(PictureSelectorR.drawable.ps_image_placeholder)
+            .into(imageView)
     }
 
     override fun pauseRequests(context: Context) {

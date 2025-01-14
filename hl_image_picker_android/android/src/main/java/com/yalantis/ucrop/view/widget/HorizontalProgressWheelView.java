@@ -11,9 +11,10 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
-import com.howl.hl_image_picker.R;;
+import com.howl.hl_image_picker.R;
 
 /**
  * Created by Oleksii Shliama (https://github.com/shliama).
@@ -92,7 +93,7 @@ public class HorizontalProgressWheelView extends View {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
         canvas.getClipBounds(mCanvasClipBounds);
 

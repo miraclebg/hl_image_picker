@@ -13,11 +13,21 @@ import com.luck.picture.lib.engine.CropFileEngine
 import com.yalantis.ucrop.UCrop
 import com.yalantis.ucrop.UCropImageEngine
 
-class ImageFileCropEngine(private val uCropOptions: UCrop.Options, private val width: Int?, private val height: Int?) : CropFileEngine {
-    override fun onStartCrop(fragment: Fragment, srcUri: Uri, destinationUri: Uri, dataSource: ArrayList<String>, requestCode: Int) {
+class ImageFileCropEngine(
+    private val uCropOptions: UCrop.Options,
+    private val width: Int?,
+    private val height: Int?
+) : CropFileEngine {
+    override fun onStartCrop(
+        fragment: Fragment,
+        srcUri: Uri,
+        destinationUri: Uri,
+        dataSource: ArrayList<String>,
+        requestCode: Int
+    ) {
         val uCrop: UCrop = UCrop.of(srcUri, destinationUri, dataSource)
         uCrop.withOptions(uCropOptions)
-        if(width != null && height != null) {
+        if (width != null && height != null) {
             uCrop.withMaxResultSize(width, height)
         }
         uCrop.setImageEngine(object : UCropImageEngine {
@@ -28,16 +38,26 @@ class ImageFileCropEngine(private val uCropOptions: UCrop.Options, private val w
                 Glide.with(context).load(url).override(180, 180).into(imageView)
             }
 
-            override fun loadImage(context: Context, url: Uri?, maxWidth: Int, maxHeight: Int, call: UCropImageEngine.OnCallbackListener<Bitmap>?) {
-                Glide.with(context).asBitmap().load(url).override(maxWidth, maxHeight).into(object : CustomTarget<Bitmap>() {
-                    override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                        call?.onCall(resource)
-                    }
+            override fun loadImage(
+                context: Context,
+                url: Uri?,
+                maxWidth: Int,
+                maxHeight: Int,
+                call: UCropImageEngine.OnCallbackListener<Bitmap>?
+            ) {
+                Glide.with(context).asBitmap().load(url).override(maxWidth, maxHeight)
+                    .into(object : CustomTarget<Bitmap>() {
+                        override fun onResourceReady(
+                            resource: Bitmap,
+                            transition: Transition<in Bitmap>?
+                        ) {
+                            call?.onCall(resource)
+                        }
 
-                    override fun onLoadCleared(placeholder: Drawable?) {
-                        call?.onCall(null)
-                    }
-                })
+                        override fun onLoadCleared(placeholder: Drawable?) {
+                            call?.onCall(null)
+                        }
+                    })
             }
         })
         uCrop.start(fragment.requireActivity(), fragment, requestCode)

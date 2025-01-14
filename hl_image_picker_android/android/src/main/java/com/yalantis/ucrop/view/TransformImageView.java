@@ -15,7 +15,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatImageView;
 
 import com.yalantis.ucrop.UCropDevelopConfig;
-import com.yalantis.ucrop.UCropImageEngine;
 import com.yalantis.ucrop.callback.BitmapLoadCallback;
 import com.yalantis.ucrop.model.ExifInfo;
 import com.yalantis.ucrop.util.BitmapLoadUtils;
@@ -164,15 +163,12 @@ public class TransformImageView extends AppCompatImageView {
     private void useCustomLoaderCrop(@NonNull final Uri imageUri, @Nullable final Uri outputUri) {
         int[] maxImageSize = BitmapLoadUtils.getMaxImageSize(getContext(), imageUri);
         if (maxImageSize[0] > 0 && maxImageSize[1] > 0) {
-            UCropDevelopConfig.imageEngine.loadImage(getContext(), imageUri, maxImageSize[0], maxImageSize[1], new UCropImageEngine.OnCallbackListener<Bitmap>() {
-                @Override
-                public void onCall(Bitmap bitmap) {
-                    if (bitmap == null) {
-                        useDefaultLoaderCrop(imageUri, outputUri);
-                    } else {
-                        Bitmap copyBitmap = bitmap.copy(bitmap.getConfig(), true);
-                        setBitmapLoadedResult(copyBitmap, new ExifInfo(0, 0, 0), imageUri, outputUri);
-                    }
+            UCropDevelopConfig.imageEngine.loadImage(getContext(), imageUri, maxImageSize[0], maxImageSize[1], bitmap -> {
+                if (bitmap == null) {
+                    useDefaultLoaderCrop(imageUri, outputUri);
+                } else {
+                    Bitmap copyBitmap = bitmap.copy(bitmap.getConfig(), true);
+                    setBitmapLoadedResult(copyBitmap, new ExifInfo(0, 0, 0), imageUri, outputUri);
                 }
             });
         } else {

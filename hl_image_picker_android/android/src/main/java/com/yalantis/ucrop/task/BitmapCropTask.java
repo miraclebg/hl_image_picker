@@ -23,11 +23,13 @@ import com.yalantis.ucrop.util.ImageHeaderParser;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Objects;
 
 /**
  * Crops part of image that fills the crop bounds.
@@ -57,12 +59,14 @@ public class BitmapCropTask extends AsyncTask<Void, Void, Throwable> {
     private final int mCompressQuality;
     private final String mImageInputPath, mImageOutputPath;
     private final Uri mImageInputUri, mImageOutputUri;
-    private final ExifInfo mExifInfo;
     private final BitmapCropCallback mCropCallback;
 
     private int mCroppedImageWidth, mCroppedImageHeight;
     private int cropOffsetX, cropOffsetY;
 
+    /**
+     * @noinspection deprecation
+     */
     public BitmapCropTask(@NonNull Context context, @Nullable Bitmap viewBitmap, @NonNull ImageState imageState, @NonNull CropParameters cropParameters,
                           @Nullable BitmapCropCallback cropCallback) {
 
@@ -84,11 +88,14 @@ public class BitmapCropTask extends AsyncTask<Void, Void, Throwable> {
         mImageOutputPath = cropParameters.getImageOutputPath();
         mImageInputUri = cropParameters.getContentImageInputUri();
         mImageOutputUri = cropParameters.getContentImageOutputUri();
-        mExifInfo = cropParameters.getExifInfo();
+        ExifInfo mExifInfo = cropParameters.getExifInfo();
 
         mCropCallback = cropCallback;
     }
 
+    /**
+     * @noinspection deprecation
+     */
     @Override
     @Nullable
     protected Throwable doInBackground(Void... params) {
@@ -114,10 +121,10 @@ public class BitmapCropTask extends AsyncTask<Void, Void, Throwable> {
         return null;
     }
 
-    private boolean crop() throws IOException {
+    private void crop() throws IOException {
         Context context = mContext.get();
         if (context == null) {
-            return false;
+            return;
         }
 
         // Downsize if needed
@@ -146,7 +153,7 @@ public class BitmapCropTask extends AsyncTask<Void, Void, Throwable> {
         // Rotate if needed
         if (mCurrentAngle != 0) {
             Matrix tempMatrix = new Matrix();
-            tempMatrix.setRotate(mCurrentAngle, mViewBitmap.getWidth() / 2, mViewBitmap.getHeight() / 2);
+            tempMatrix.setRotate(mCurrentAngle, (float) (mViewBitmap.getWidth() / 2), (float) (mViewBitmap.getHeight() / 2));
 
             Bitmap rotatedBitmap = Bitmap.createBitmap(mViewBitmap, 0, 0, mViewBitmap.getWidth(), mViewBitmap.getHeight(),
                     tempMatrix, true);
@@ -169,15 +176,13 @@ public class BitmapCropTask extends AsyncTask<Void, Void, Throwable> {
             if (mCompressFormat.equals(Bitmap.CompressFormat.JPEG)) {
                 copyExifForOutputFile(context);
             }
-            return true;
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && FileUtils.isContent(mImageInputPath)) {
                 InputStream inputStream = context.getContentResolver().openInputStream(Uri.parse(mImageInputPath));
-                FileUtils.writeFileFromIS(inputStream, new FileOutputStream(mImageOutputPath));
+                FileUtils.writeFileFromIS(inputStream, Files.newOutputStream(Paths.get(mImageOutputPath)));
             } else {
                 FileUtils.copyFile(mImageInputPath, mImageOutputPath);
             }
-            return false;
         }
     }
 
@@ -238,10 +243,13 @@ public class BitmapCropTask extends AsyncTask<Void, Void, Throwable> {
             outputStream = context.getContentResolver().openOutputStream(mImageOutputUri);
             outStream = new ByteArrayOutputStream();
             croppedBitmap.compress(mCompressFormat, mCompressQuality, outStream);
-            outputStream.write(outStream.toByteArray());
+
+            if (outputStream != null) {
+                outputStream.write(outStream.toByteArray());
+            }
             croppedBitmap.recycle();
         } catch (IOException exc) {
-            Log.e(TAG, exc.getLocalizedMessage());
+            Log.e(TAG, Objects.requireNonNull(exc.getLocalizedMessage()));
         } finally {
             BitmapLoadUtils.close(outputStream);
             BitmapLoadUtils.close(outStream);
@@ -267,6 +275,9 @@ public class BitmapCropTask extends AsyncTask<Void, Void, Throwable> {
                 || mCurrentAngle != 0;
     }
 
+    /**
+     * @noinspection deprecation
+     */
     @Override
     protected void onPostExecute(@Nullable Throwable t) {
         if (mCropCallback != null) {

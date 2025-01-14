@@ -32,13 +32,9 @@ public class BitmapLoadUtils {
 
     private static final String TAG = "BitmapLoadUtils";
 
-    public static void decodeBitmapInBackground(@NonNull Context context,
-                                                @NonNull Uri uri, @Nullable Uri outputUri,
-                                                int requiredWidth, int requiredHeight,
-                                                BitmapLoadCallback loadCallback) {
+    public static void decodeBitmapInBackground(@NonNull Context context, @NonNull Uri uri, @Nullable Uri outputUri, int requiredWidth, int requiredHeight, BitmapLoadCallback loadCallback) {
 
-        new BitmapLoadTask(context, uri, outputUri, requiredWidth, requiredHeight, loadCallback)
-                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        new BitmapLoadTask(context, uri, outputUri, requiredWidth, requiredHeight, loadCallback).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     public static Bitmap transformBitmap(@NonNull Bitmap bitmap, @NonNull Matrix transformMatrix) {
@@ -118,7 +114,7 @@ public class BitmapLoadUtils {
         try {
             InputStream stream = context.getContentResolver().openInputStream(mInputUri);
             BitmapFactory.decodeStream(stream, null, options);
-            options.inSampleSize = BitmapLoadUtils.computeSize(options.outWidth,options.outHeight);
+            options.inSampleSize = BitmapLoadUtils.computeSize(options.outWidth, options.outHeight);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -179,7 +175,7 @@ public class BitmapLoadUtils {
             orientation = new ImageHeaderParser(stream).getOrientation();
             close(stream);
         } catch (IOException e) {
-            Log.e(TAG, "getExifOrientation: " + imageUri.toString(), e);
+            Log.e(TAG, "getExifOrientation: " + imageUri, e);
         }
         return orientation;
     }
@@ -227,7 +223,6 @@ public class BitmapLoadUtils {
      *
      * @return - max bitmap size in pixels.
      */
-    @SuppressWarnings({"SuspiciousNameCombination", "deprecation"})
     public static int calculateMaxBitmapSize(@NonNull Context context) {
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Display display;
@@ -264,7 +259,7 @@ public class BitmapLoadUtils {
 
     @SuppressWarnings("ConstantConditions")
     public static void close(@Nullable Closeable c) {
-        if (c != null && c instanceof Closeable) { // java.lang.IncompatibleClassChangeError: interface not implemented
+        if (c instanceof Closeable) { // java.lang.IncompatibleClassChangeError: interface not implemented
             try {
                 c.close();
             } catch (IOException e) {

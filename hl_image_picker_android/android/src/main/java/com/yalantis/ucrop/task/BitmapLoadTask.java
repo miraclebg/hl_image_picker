@@ -24,6 +24,7 @@ import java.lang.ref.WeakReference;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 import okio.BufferedSource;
 import okio.Okio;
 import okio.Sink;
@@ -40,8 +41,6 @@ public class BitmapLoadTask extends AsyncTask<Void, Void, BitmapLoadTask.BitmapW
     private final WeakReference<Context> mContext;
     private Uri mInputUri;
     private Uri mOutputUri;
-    private final int mRequiredWidth;
-    private final int mRequiredHeight;
 
     private final BitmapLoadCallback mBitmapLoadCallback;
 
@@ -62,6 +61,9 @@ public class BitmapLoadTask extends AsyncTask<Void, Void, BitmapLoadTask.BitmapW
 
     }
 
+    /**
+     * @noinspection deprecation
+     */
     public BitmapLoadTask(@NonNull Context context,
                           @NonNull Uri inputUri, @Nullable Uri outputUri,
                           int requiredWidth, int requiredHeight,
@@ -69,12 +71,13 @@ public class BitmapLoadTask extends AsyncTask<Void, Void, BitmapLoadTask.BitmapW
         mContext = new WeakReference<>(context);
         mInputUri = inputUri;
         mOutputUri = outputUri;
-        mRequiredWidth = requiredWidth;
-        mRequiredHeight = requiredHeight;
         mBitmapLoadCallback = loadCallback;
     }
 
 
+    /**
+     * @noinspection deprecation
+     */
     @Override
     @NonNull
     protected BitmapWorkerResult doInBackground(Void... params) {
@@ -98,7 +101,7 @@ public class BitmapLoadTask extends AsyncTask<Void, Void, BitmapLoadTask.BitmapW
         try {
             InputStream stream = context.getContentResolver().openInputStream(mInputUri);
             BitmapFactory.decodeStream(stream, null, options);
-            options.inSampleSize = BitmapLoadUtils.computeSize(options.outWidth,options.outHeight);
+            options.inSampleSize = BitmapLoadUtils.computeSize(options.outWidth, options.outHeight);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -188,17 +191,24 @@ public class BitmapLoadTask extends AsyncTask<Void, Void, BitmapLoadTask.BitmapW
         Response response = null;
         try {
             Request request = new Request.Builder()
-                .url(inputUri.toString())
-                .build();
+                    .url(inputUri.toString())
+                    .build();
             response = client.newCall(request).execute();
-            source = response.body().source();
+            ResponseBody body = response.body();
+            source = body != null ? body.source() : null;
 
-            OutputStream outputStream = context.getContentResolver().openOutputStream(outputUri);
-            if (outputStream != null) {
-                sink = Okio.sink(outputStream);
-                source.readAll(sink);
-            } else {
-                throw new NullPointerException("OutputStream for given output Uri is null");
+            if (source != null) {
+                OutputStream outputStream = context.getContentResolver().openOutputStream(outputUri);
+                if (outputStream != null) {
+                    try {
+                        sink = Okio.sink(outputStream);
+                        source.readAll(sink);
+                    } finally {
+                        outputStream.close();
+                    }
+                } else {
+                    throw new NullPointerException("OutputStream for given output Uri is null");
+                }
             }
         } finally {
             BitmapLoadUtils.close(source);
@@ -214,6 +224,9 @@ public class BitmapLoadTask extends AsyncTask<Void, Void, BitmapLoadTask.BitmapW
         }
     }
 
+    /**
+     * @noinspection deprecation
+     */
     @Override
     protected void onPostExecute(@NonNull BitmapWorkerResult result) {
         if (result.mBitmapWorkerException == null) {

@@ -6,6 +6,8 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 
+import androidx.annotation.NonNull;
+
 import com.yalantis.ucrop.util.RotationGestureDetector;
 
 /**
@@ -142,7 +144,7 @@ public class GestureCropImageView extends CropImageView {
         }
 
         @Override
-        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+        public boolean onScroll(MotionEvent e1, @NonNull MotionEvent e2, float distanceX, float distanceY) {
             postTranslate(-distanceX, -distanceY);
             return true;
         }
@@ -152,9 +154,8 @@ public class GestureCropImageView extends CropImageView {
     private class RotateListener extends RotationGestureDetector.SimpleOnRotationGestureListener {
 
         @Override
-        public boolean onRotation(RotationGestureDetector rotationDetector) {
+        public void onRotation(RotationGestureDetector rotationDetector) {
             postRotate(rotationDetector.getAngle(), mMidPntX, mMidPntY);
-            return true;
         }
 
     }

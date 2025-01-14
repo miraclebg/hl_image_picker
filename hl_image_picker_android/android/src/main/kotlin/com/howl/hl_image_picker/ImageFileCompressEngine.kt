@@ -75,7 +75,7 @@ class ImageFileCompressEngine(
                     setOrientation(file, originalOrientation)
                     call.onCallback(uri.toString(), file.absolutePath)
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 call.onCallback(uri.toString(), null)
             }
         }
@@ -95,7 +95,7 @@ class ImageFileCompressEngine(
                     intArrayOf(options.outWidth, options.outHeight)
                 }
             } ?: intArrayOf(0, 0) // in case openInputStream returns null
-        } catch (e: IOException) {
+        } catch (_: IOException) {
             intArrayOf(0, 0)
         }
     }

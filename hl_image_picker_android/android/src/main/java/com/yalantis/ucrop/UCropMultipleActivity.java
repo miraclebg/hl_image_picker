@@ -13,7 +13,6 @@ import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.AnimationUtils;
@@ -108,7 +107,7 @@ public class UCropMultipleActivity extends AppCompatActivity implements UCropFra
     private void initCropFragments(Intent intent) {
         isSkipCropForbid = intent.getBooleanExtra(UCrop.Options.EXTRA_CROP_FORBID_SKIP, false);
         ArrayList<String> totalCropData = intent.getStringArrayListExtra(UCrop.EXTRA_CROP_TOTAL_DATA_SOURCE);
-        if (totalCropData == null || totalCropData.size() == 0) {
+        if (totalCropData == null || totalCropData.isEmpty()) {
             throw new IllegalArgumentException("Missing required parameters, count cannot be less than 1");
         }
         uCropSupportList = new ArrayList<>();
@@ -128,13 +127,16 @@ public class UCropMultipleActivity extends AppCompatActivity implements UCropFra
                     continue;
                 }
                 Uri inputUri = FileUtils.isContent(path) || FileUtils.isHasHttp(path) ? Uri.parse(path) : Uri.fromFile(new File(path));
-                String postfix = FileUtils.getPostfixDefaultJPEG(UCropMultipleActivity.this,
-                        isForbidCropGifWebp, inputUri);
-                String fileName = TextUtils.isEmpty(outputCropFileName) ? FileUtils.getCreateFileName("CROP_" + (i + 1)) + postfix
-                        : (i + 1) + FileUtils.getCreateFileName() + "_" + outputCropFileName;
-                Uri destinationUri = Uri.fromFile(new File(getSandboxPathDir(), fileName));
+                String postfix = FileUtils.getPostfixDefaultJPEG(UCropMultipleActivity.this, isForbidCropGifWebp, inputUri);
+                String fileName = TextUtils.isEmpty(outputCropFileName) ? FileUtils.getCreateFileName("CROP_" + (i + 1)) + postfix : (i + 1) + FileUtils.getCreateFileName() + "_" + outputCropFileName;
                 extras.putParcelable(UCrop.EXTRA_INPUT_URI, inputUri);
-                extras.putParcelable(UCrop.EXTRA_OUTPUT_URI, destinationUri);
+                String sandboxPathDir = getSandboxPathDir();
+
+                if (sandboxPathDir != null) {
+                    Uri destinationUri = Uri.fromFile(new File(sandboxPathDir, fileName));
+                    extras.putParcelable(UCrop.EXTRA_OUTPUT_URI, destinationUri);
+                }
+
                 AspectRatio aspectRatio = aspectRatioList != null && aspectRatioList.size() > i ? aspectRatioList.get(i) : null;
                 if (aspectRatio != null) {
                     extras.putFloat(UCrop.EXTRA_ASPECT_RATIO_X, aspectRatio.getAspectRatioX());
@@ -145,7 +147,7 @@ public class UCropMultipleActivity extends AppCompatActivity implements UCropFra
             }
         }
 
-        if (uCropSupportList.size() == 0) {
+        if (uCropSupportList.isEmpty()) {
             throw new IllegalArgumentException("No clipping data sources are available");
         }
         setGalleryAdapter();
@@ -167,7 +169,7 @@ public class UCropMultipleActivity extends AppCompatActivity implements UCropFra
             return position;
         }
         ArrayList<String> skipCropMimeType = extras.getStringArrayList(UCrop.Options.EXTRA_SKIP_CROP_MIME_TYPE);
-        if (skipCropMimeType != null && skipCropMimeType.size() > 0) {
+        if (skipCropMimeType != null && !skipCropMimeType.isEmpty()) {
             position = -1;
             filterSet.addAll(skipCropMimeType);
             for (int i = 0; i < uCropSupportList.size(); i++) {
@@ -230,38 +232,31 @@ public class UCropMultipleActivity extends AppCompatActivity implements UCropFra
         layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         galleryRecycle.setLayoutManager(layoutManager);
         if (galleryRecycle.getItemDecorationCount() == 0) {
-            galleryRecycle.addItemDecoration(new GridSpacingItemDecoration(Integer.MAX_VALUE,
-                    DensityUtil.dip2px(this, 6), true));
+            galleryRecycle.addItemDecoration(new GridSpacingItemDecoration(Integer.MAX_VALUE, DensityUtil.dip2px(this, 6), true));
         }
-        LayoutAnimationController animation = AnimationUtils
-                .loadLayoutAnimation(this, R.anim.ucrop_layout_animation_fall_down);
+        LayoutAnimationController animation = AnimationUtils.loadLayoutAnimation(this, R.anim.ucrop_layout_animation_fall_down);
         galleryRecycle.setLayoutAnimation(animation);
-        int galleryBarBackground = getIntent().getIntExtra(UCrop.Options.EXTRA_GALLERY_BAR_BACKGROUND,
-                R.drawable.ucrop_gallery_bg);
+        int galleryBarBackground = getIntent().getIntExtra(UCrop.Options.EXTRA_GALLERY_BAR_BACKGROUND, R.drawable.ucrop_gallery_bg);
         galleryRecycle.setBackgroundResource(galleryBarBackground);
         galleryAdapter = new UCropGalleryAdapter(uCropSupportList);
-        galleryAdapter.setOnItemClickListener(new UCropGalleryAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(int position, View view) {
-                if (isSkipCropForbid) {
-                    return;
-                }
-                String path = uCropSupportList.get(position);
-                String mimeType = getPathToMimeType(path);
-                if (filterSet.contains(mimeType)) {
-                    Toast.makeText(getApplicationContext(),
-                            getString(R.string.ucrop_not_crop), Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if (galleryAdapter.getCurrentSelectPosition() == position) {
-                    return;
-                }
-                galleryAdapter.notifyItemChanged(galleryAdapter.getCurrentSelectPosition());
-                galleryAdapter.setCurrentSelectPosition(position);
-                galleryAdapter.notifyItemChanged(position);
-                UCropFragment uCropFragment = fragments.get(position);
-                switchCropFragment(uCropFragment, position);
+        galleryAdapter.setOnItemClickListener((position, view) -> {
+            if (isSkipCropForbid) {
+                return;
             }
+            String path = uCropSupportList.get(position);
+            String mimeType = getPathToMimeType(path);
+            if (filterSet.contains(mimeType)) {
+                Toast.makeText(getApplicationContext(), getString(R.string.ucrop_not_crop), Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (galleryAdapter.getCurrentSelectPosition() == position) {
+                return;
+            }
+            galleryAdapter.notifyItemChanged(galleryAdapter.getCurrentSelectPosition());
+            galleryAdapter.setCurrentSelectPosition(position);
+            galleryAdapter.notifyItemChanged(position);
+            UCropFragment uCropFragment = fragments.get(position);
+            switchCropFragment(uCropFragment, position);
         });
         galleryRecycle.setAdapter(galleryAdapter);
     }
@@ -271,15 +266,23 @@ public class UCropMultipleActivity extends AppCompatActivity implements UCropFra
      *
      * @return
      */
+    @Nullable
     private String getSandboxPathDir() {
         File customFile;
         String outputDir = getIntent().getStringExtra(UCrop.Options.EXTRA_CROP_OUTPUT_DIR);
-        if (outputDir == null || "".equals(outputDir)) {
-            customFile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES).getAbsolutePath(), "Sandbox");
+        if (outputDir == null || outputDir.isEmpty()) {
+            File dir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+            if (dir == null) {
+                return null;
+            }
+
+            customFile = new File(dir.getAbsolutePath(), "Sandbox");
         } else {
             customFile = new File(outputDir);
         }
         if (!customFile.exists()) {
+            //noinspection ResultOfMethodCallIgnored
             customFile.mkdirs();
         }
         return customFile.getAbsolutePath() + File.separator;
@@ -321,14 +324,18 @@ public class UCropMultipleActivity extends AppCompatActivity implements UCropFra
         toolbarTitle.setTextSize(mToolbarTitleSize);
 
         // Color buttons inside the Toolbar
-        Drawable stateButtonDrawable = AppCompatResources.getDrawable(this, mToolbarCancelDrawable).mutate();
-        ColorFilter colorFilter = BlendModeColorFilterCompat.createBlendModeColorFilterCompat(mToolbarWidgetColor, BlendModeCompat.SRC_ATOP);
-        stateButtonDrawable.setColorFilter(colorFilter);
-        toolbar.setNavigationIcon(stateButtonDrawable);
-        setSupportActionBar(toolbar);
-        final ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayShowTitleEnabled(false);
+        Drawable d = AppCompatResources.getDrawable(this, mToolbarCancelDrawable);
+
+        if (d != null) {
+            Drawable stateButtonDrawable = d.mutate();
+            ColorFilter colorFilter = BlendModeColorFilterCompat.createBlendModeColorFilterCompat(mToolbarWidgetColor, BlendModeCompat.SRC_ATOP);
+            stateButtonDrawable.setColorFilter(colorFilter);
+            toolbar.setNavigationIcon(stateButtonDrawable);
+            setSupportActionBar(toolbar);
+            final ActionBar actionBar = getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.setDisplayShowTitleEnabled(false);
+            }
         }
     }
 
@@ -339,12 +346,10 @@ public class UCropMultipleActivity extends AppCompatActivity implements UCropFra
      */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void setStatusBarColor(@ColorInt int color) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            final Window window = getWindow();
-            if (window != null) {
-                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-                window.setStatusBarColor(color);
-            }
+        final Window window = getWindow();
+        if (window != null) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(color);
         }
     }
 
@@ -419,6 +424,11 @@ public class UCropMultipleActivity extends AppCompatActivity implements UCropFra
         try {
             String key = intent.getStringExtra(UCrop.EXTRA_CROP_INPUT_ORIGINAL);
             JSONObject uCropObject = uCropTotalQueue.get(key);
+
+            if (uCropObject == null) {
+                return;
+            }
+
             Uri output = UCrop.getOutput(intent);
             uCropObject.put(CustomIntentKey.EXTRA_OUT_PUT_PATH, output != null ? output.getPath() : "");
             uCropObject.put(CustomIntentKey.EXTRA_IMAGE_WIDTH, UCrop.getOutputImageWidth(intent));
@@ -432,7 +442,6 @@ public class UCropMultipleActivity extends AppCompatActivity implements UCropFra
         }
     }
 
-    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     private void handleCropError(@NonNull Intent result) {
         final Throwable cropError = UCrop.getError(result);
         if (cropError != null) {

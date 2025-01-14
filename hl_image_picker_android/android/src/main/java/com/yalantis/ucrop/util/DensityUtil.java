@@ -1,5 +1,6 @@
 package com.yalantis.ucrop.util;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 
@@ -22,7 +23,7 @@ public class DensityUtil {
      */
     public static int getStatusBarHeight(Context context) {
         int result = 0;
-        int resourceId = Resources.getSystem().getIdentifier("status_bar_height", "dimen", "android");
+        @SuppressLint({"InternalInsetResource", "DiscouragedApi"}) int resourceId = Resources.getSystem().getIdentifier("status_bar_height", "dimen", "android");
         if (resourceId > 0) {
             result = context.getResources().getDimensionPixelSize(resourceId);
         }

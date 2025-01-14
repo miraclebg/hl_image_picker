@@ -6,11 +6,6 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-/**
- * @author：luck
- * @data：2016/12/27 下午23:50
- * @describe:GridSpacingItemDecoration
- */
 public class GridSpacingItemDecoration extends RecyclerView.ItemDecoration {
 
     private final int spanCount;

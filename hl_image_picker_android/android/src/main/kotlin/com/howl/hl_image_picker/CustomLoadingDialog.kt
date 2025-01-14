@@ -8,7 +8,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import com.luck.picture.lib.R as PictureSelectorR
 
-class CustomLoadingDialog(context: Context,  private val message: String?) : Dialog(context, PictureSelectorR.style.Picture_Theme_AlertDialog) {
+class CustomLoadingDialog(context: Context, private val message: String?) :
+    Dialog(context, PictureSelectorR.style.Picture_Theme_AlertDialog) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -1,5 +1,6 @@
 package com.yalantis.ucrop.view;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.RectF;
@@ -9,8 +10,7 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 
-import com.howl.hl_image_picker.R;;
-import com.yalantis.ucrop.callback.CropBoundsChangeListener;
+import com.howl.hl_image_picker.R;
 import com.yalantis.ucrop.callback.OverlayViewChangeListener;
 
 public class UCropView extends FrameLayout {
@@ -29,7 +29,7 @@ public class UCropView extends FrameLayout {
         mGestureCropImageView = findViewById(R.id.image_view_crop);
         mViewOverlay = findViewById(R.id.view_overlay);
 
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ucrop_UCropView);
+        @SuppressLint("CustomViewStyleable") TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ucrop_UCropView);
         mViewOverlay.processStyledAttributes(a);
         mGestureCropImageView.processStyledAttributes(a);
         a.recycle();
@@ -39,12 +39,7 @@ public class UCropView extends FrameLayout {
     }
 
     private void setListenersToViews() {
-        mGestureCropImageView.setCropBoundsChangeListener(new CropBoundsChangeListener() {
-            @Override
-            public void onCropAspectRatioChanged(float cropRatio) {
-                mViewOverlay.setTargetAspectRatio(cropRatio);
-            }
-        });
+        mGestureCropImageView.setCropBoundsChangeListener(mViewOverlay::setTargetAspectRatio);
         mViewOverlay.setOverlayViewChangeListener(new OverlayViewChangeListener() {
             @Override
             public void onCropRectUpdated(RectF cropRect) {

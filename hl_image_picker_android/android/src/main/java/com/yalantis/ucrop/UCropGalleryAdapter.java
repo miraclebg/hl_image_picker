@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.BlendModeColorFilterCompat;
 import androidx.core.graphics.BlendModeCompat;
@@ -37,6 +38,7 @@ public class UCropGalleryAdapter extends RecyclerView.Adapter<UCropGalleryAdapte
         return currentSelectPosition;
     }
 
+    @NonNull
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int position) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.ucrop_gallery_adapter_item,
@@ -45,7 +47,7 @@ public class UCropGalleryAdapter extends RecyclerView.Adapter<UCropGalleryAdapte
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         String path = list.get(position);
         if (UCropDevelopConfig.imageEngine != null) {
             UCropDevelopConfig.imageEngine.loadImage(holder.itemView.getContext(), path, holder.mIvPhoto);
@@ -63,12 +65,9 @@ public class UCropGalleryAdapter extends RecyclerView.Adapter<UCropGalleryAdapte
             holder.mViewCurrentSelect.setVisibility(View.GONE);
         }
         holder.mIvPhoto.setColorFilter(colorFilter);
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (listener != null) {
-                    listener.onItemClick(holder.getAbsoluteAdapterPosition(), v);
-                }
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onItemClick(holder.getAbsoluteAdapterPosition(), v);
             }
         });
     }

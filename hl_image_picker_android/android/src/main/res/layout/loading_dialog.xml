@@ -11,16 +11,16 @@
         android:layout_width="25dp"
         android:layout_height="25dp"
         android:layout_gravity="center_horizontal"
-        android:indeterminateBehavior="repeat"
-        />
+        android:indeterminateBehavior="repeat" />
+
     <TextView
         android:id="@+id/loading_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:paddingStart="8dp"
         android:paddingLeft="8dp"
         android:text="Loading"
         android:textColor="#FFFFFF"
-        android:textSize="14sp"
-        android:layout_gravity="center"
-        android:paddingStart="8dp" />
+        android:textSize="14sp" />
 </LinearLayout>

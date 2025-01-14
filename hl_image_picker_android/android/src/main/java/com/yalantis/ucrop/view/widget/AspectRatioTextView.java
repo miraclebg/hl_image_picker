@@ -1,5 +1,6 @@
 package com.yalantis.ucrop.view.widget;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -17,7 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.content.ContextCompat;
 
-import com.howl.hl_image_picker.R;;
+import com.howl.hl_image_picker.R;
 import com.yalantis.ucrop.model.AspectRatio;
 import com.yalantis.ucrop.view.CropImageView;
 
@@ -28,6 +29,9 @@ import java.util.Locale;
  */
 public class AspectRatioTextView extends AppCompatTextView {
 
+    /**
+     * @noinspection FieldCanBeLocal
+     */
     private final float MARGIN_MULTIPLIER = 1.5f;
     private final Rect mCanvasClipBounds = new Rect();
     private Paint mDotPaint;
@@ -47,14 +51,14 @@ public class AspectRatioTextView extends AppCompatTextView {
 
     public AspectRatioTextView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ucrop_AspectRatioTextView);
+        @SuppressLint("CustomViewStyleable") TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ucrop_AspectRatioTextView);
         init(a);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public AspectRatioTextView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr);
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ucrop_AspectRatioTextView);
+        @SuppressLint("CustomViewStyleable") TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ucrop_AspectRatioTextView);
         init(a);
     }
 
@@ -103,7 +107,6 @@ public class AspectRatioTextView extends AppCompatTextView {
         }
     }
 
-    @SuppressWarnings("deprecation")
     private void init(@NonNull TypedArray a) {
         setGravity(Gravity.CENTER_HORIZONTAL);
 
@@ -150,6 +153,7 @@ public class AspectRatioTextView extends AppCompatTextView {
     private void toggleAspectRatio() {
         if (mAspectRatio != CropImageView.SOURCE_IMAGE_ASPECT_RATIO) {
             float tempRatioW = mAspectRatioX;
+            //noinspection SuspiciousNameCombination
             mAspectRatioX = mAspectRatioY;
             mAspectRatioY = tempRatioW;
 
