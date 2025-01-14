@@ -89,10 +89,10 @@ class HLImagePickerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     private var flutterCall: MethodCall? = null
-    private var mediaPickerResult: Result<Any>? = null
+    private var mediaPickerResult: Result? = null
     private lateinit var uiStyle: Map<String, Any>
 
-    override fun onMethodCall(call: MethodCall, result: Result<Any>) {
+    override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
             "openPicker" -> {
                 this.flutterCall = call
