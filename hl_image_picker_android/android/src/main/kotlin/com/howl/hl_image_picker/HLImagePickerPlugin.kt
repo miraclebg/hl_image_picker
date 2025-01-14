@@ -52,6 +52,7 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
+import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
 import java.io.File
 import java.net.URLConnection
@@ -64,16 +65,12 @@ private class AndroidQSandboxFileEngine : UriToFileTransformEngine {
         mineType: String?,
         call: OnKeyValueResultCallbackListener?
     ) {
-        call?.onCallback(
-            srcPath,
-            SandboxTransformUtils.copyPathToSandbox(context, srcPath, mineType)
-        )
+        call?.onCallback(srcPath, SandboxTransformUtils.copyPathToSandbox(context, srcPath, mineType))
     }
 }
 
 /** HLImagePickerPlugin */
-class HLImagePickerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
-    PluginRegistry.ActivityResultListener {
+class HLImagePickerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, PluginRegistry.ActivityResultListener {
     private lateinit var channel: MethodChannel
     private var currentActivity: Activity? = null
     private lateinit var applicationContext: Context
@@ -137,14 +134,7 @@ class HLImagePickerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             .setCropEngine(getCropFileEngine())
             .setVideoThumbnailListener(getVideoThumbnail())
             .setRecordVideoMaxSecond(recordVideoMaxSecond)
-            .setCompressEngine(
-                getCompressFileEngine(
-                    compressQuality,
-                    compressFormat,
-                    maxWidth,
-                    maxHeight
-                )
-            )
+            .setCompressEngine(getCompressFileEngine(compressQuality, compressFormat, maxWidth, maxHeight))
             .setPermissionDeniedListener { fragment, permissionArray, requestCode, _ ->
                 handlePermissionDenied(fragment, permissionArray, requestCode)
             }
@@ -175,16 +165,14 @@ class HLImagePickerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         val selectedAssets: MutableList<LocalMedia> = mutableListOf()
         val selectedIds = flutterCall?.argument<ArrayList<String>>("selectedIds") ?: ArrayList()
         for (i in 0 until selectedIds.size) {
-            val localMedia: LocalMedia =
-                LocalMedia.generateLocalMedia(applicationContext, selectedIds[i])
+            val localMedia: LocalMedia = LocalMedia.generateLocalMedia(applicationContext, selectedIds[i])
             selectedAssets.add(localMedia)
         }
         val numberOfColumn = flutterCall?.argument<Int>("numberOfColumn") ?: 3
         val enablePreview = flutterCall?.argument<Boolean>("enablePreview") ?: false
         val maxSelectedAssets = flutterCall?.argument<Int>("maxSelectedAssets") ?: 1
         val minSelectedAssets = flutterCall?.argument<Int>("minSelectedAssets") ?: 0
-        val selectionMode =
-            if (maxSelectedAssets == 1) SelectModeConfig.SINGLE else SelectModeConfig.MULTIPLE
+        val selectionMode = if (maxSelectedAssets == 1) SelectModeConfig.SINGLE else SelectModeConfig.MULTIPLE
         val usedCameraButton = flutterCall?.argument<Boolean>("usedCameraButton") ?: true
         val maxFileSize = flutterCall?.argument<Double>("maxFileSize") ?: 0.0
         val minFileSize = flutterCall?.argument<Double>("minFileSize") ?: 0.0
@@ -208,14 +196,7 @@ class HLImagePickerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             .isPreviewVideo(enablePreview)
             .isPreviewAudio(enablePreview)
             .setSelectedData(selectedAssets)
-            .setCompressEngine(
-                getCompressFileEngine(
-                    pickerCompressQuality,
-                    pickerCompressFormat,
-                    maxWidth,
-                    maxHeight
-                )
-            )
+            .setCompressEngine(getCompressFileEngine(pickerCompressQuality, pickerCompressFormat, maxWidth, maxHeight))
             .isWithSelectVideoImage(true)
             .isGif(isGif)
             .setMaxVideoSelectNum(maxSelectedAssets)
@@ -233,27 +214,18 @@ class HLImagePickerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             .setPermissionDeniedListener { fragment, permissionArray, requestCode, _ ->
                 handlePermissionDenied(fragment, permissionArray, requestCode)
             }
-            .setCustomLoadingListener { context ->
-                CustomLoadingDialog(
-                    context,
-                    uiStyle.getOrElse("loadingText") { "Loading" } as String)
-            }
+            .setCustomLoadingListener { context -> CustomLoadingDialog(context, uiStyle.getOrElse("loadingText") { "Loading" } as String) }
             .setSelectLimitTipsListener { context, _, config, limitType ->
                 handleSelectLimitTips(context, config, limitType)
             }
             .setDefaultAlbumName(uiStyle.getOrElse("defaultAlbumName") { "Recents" } as String)
             .setSelectorUIStyle(handleUIStyle())
             .isEmptyResultReturn(true)
-            .setAttachViewLifecycle(object : IBridgeViewLifecycle {
-                override fun onViewCreated(
-                    fragment: Fragment?,
-                    view: View?,
-                    savedInstanceState: Bundle?
-                ) {
-                }
+            .setAttachViewLifecycle(object: IBridgeViewLifecycle {
+                override fun onViewCreated(fragment: Fragment?, view: View?, savedInstanceState: Bundle?) {}
 
                 override fun onDestroy(fragment: Fragment?) {
-                    if (fragment is PictureSelectorFragment && shouldReturnOnDestroy) {
+                    if(fragment is PictureSelectorFragment && shouldReturnOnDestroy) {
                         val mediaList: List<Map<String, Any>> = listOf()
                         mediaPickerResult?.success(mediaList)
                     }
@@ -289,8 +261,8 @@ class HLImagePickerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         mainStyle.isPreviewDisplaySelectGallery = true
         mainStyle.isPreviewSelectRelativeBottom = true
         mainStyle.isCompleteSelectRelativeTop = true
-        mainStyle.selectText = uiStyle.getOrElse("doneText") { "Done" } as String
-        mainStyle.selectNormalText = uiStyle.getOrElse("doneText") { "Done" } as String
+        mainStyle.selectText = uiStyle.getOrElse("doneText") {"Done"} as String
+        mainStyle.selectNormalText = uiStyle.getOrElse("doneText") {"Done"} as String
         mainStyle.selectTextColor = Color.parseColor("#007AFF")
         mainStyle.selectNormalTextColor = Color.parseColor("#007AFF")
         val maxSelectedAssets = flutterCall?.argument<Int>("maxSelectedAssets") ?: 1
@@ -332,65 +304,45 @@ class HLImagePickerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         }
     }
 
-    private fun handleSelectLimitTips(
-        context: Context?,
-        config: SelectorConfig,
-        limitType: Int
-    ): Boolean {
+    private fun handleSelectLimitTips(context: Context?, config: SelectorConfig, limitType: Int): Boolean {
         return when (limitType) {
             SelectLimitType.SELECT_MAX_SELECT_LIMIT -> {
-                showDialog(
-                    context,
-                    uiStyle.getOrElse("maxSelectedAssetsErrorText") { "Exceeded maximum number of selected items" } as String)
+                showDialog(context, uiStyle.getOrElse("maxSelectedAssetsErrorText") { "Exceeded maximum number of selected items" } as String)
                 true
             }
 
             SelectLimitType.SELECT_MIN_SELECT_LIMIT -> {
-                showDialog(
-                    context,
-                    uiStyle.getOrElse("minSelectedAssetsErrorText") { "Need to select at least ${config.minSelectNum}" } as String)
+                showDialog(context, uiStyle.getOrElse("minSelectedAssetsErrorText") { "Need to select at least ${config.minSelectNum}" } as String)
                 true
             }
 
             SelectLimitType.SELECT_MAX_VIDEO_SELECT_LIMIT -> {
-                showDialog(
-                    context,
-                    uiStyle.getOrElse("maxSelectedAssetsErrorText") { "Exceeded maximum number of selected items" } as String)
+                showDialog(context, uiStyle.getOrElse("maxSelectedAssetsErrorText") { "Exceeded maximum number of selected items" } as String)
                 true
             }
 
             SelectLimitType.SELECT_MIN_VIDEO_SELECT_LIMIT -> {
-                showDialog(
-                    context,
-                    uiStyle.getOrElse("minSelectedAssetsErrorText") { "Need to select at least ${config.minSelectNum}" } as String)
+                showDialog(context, uiStyle.getOrElse("minSelectedAssetsErrorText") { "Need to select at least ${config.minSelectNum}" } as String)
                 true
             }
 
             SelectLimitType.SELECT_MAX_VIDEO_SECOND_SELECT_LIMIT -> {
-                showDialog(
-                    context,
-                    uiStyle.getOrElse("maxDurationErrorText") { "Exceeded maximum duration of the video" } as String)
+                showDialog(context, uiStyle.getOrElse("maxDurationErrorText") { "Exceeded maximum duration of the video" } as String)
                 true
             }
 
             SelectLimitType.SELECT_MIN_VIDEO_SECOND_SELECT_LIMIT -> {
-                showDialog(
-                    context,
-                    uiStyle.getOrElse("minDurationErrorText") { "The video is too short" } as String)
+                showDialog(context, uiStyle.getOrElse("minDurationErrorText") { "The video is too short" } as String)
                 true
             }
 
             SelectLimitType.SELECT_MAX_FILE_SIZE_LIMIT -> {
-                showDialog(
-                    context,
-                    uiStyle.getOrElse("maxFileSizeErrorText") { "Exceeded maximum file size" } as String)
+                showDialog(context, uiStyle.getOrElse("maxFileSizeErrorText") {"Exceeded maximum file size"} as String)
                 true
             }
 
             SelectLimitType.SELECT_MIN_FILE_SIZE_LIMIT -> {
-                showDialog(
-                    context,
-                    uiStyle.getOrElse("minFileSizeErrorText") { "The file size is too small" } as String)
+                showDialog(context, uiStyle.getOrElse("minFileSizeErrorText") {"The file size is too small"} as String)
                 true
             }
 
@@ -398,40 +350,31 @@ class HLImagePickerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         }
     }
 
-    private fun handlePermissionDenied(
-        fragment: Fragment,
-        permissionArray: Array<String>?,
-        requestCode: Int
-    ) {
-        val message: String =
-            if (TextUtils.equals(permissionArray?.get(0), PermissionConfig.CAMERA[0])) {
-                uiStyle.getOrElse("noCameraPermissionText") { "No permission to access camera" } as String
-            } else if (TextUtils.equals(
-                    permissionArray?.get(0),
-                    Manifest.permission.RECORD_AUDIO
-                )
-            ) {
-                uiStyle.getOrElse("noRecordAudioPermissionText") { "No permission to record audio" } as String
-            } else {
-                uiStyle.getOrElse("noAlbumPermissionText") { "No permission to access album" } as String
-            }
+    private fun handlePermissionDenied(fragment: Fragment, permissionArray: Array<String>?, requestCode: Int) {
+        val message: String = if (TextUtils.equals(permissionArray?.get(0), PermissionConfig.CAMERA[0])) {
+            uiStyle.getOrElse("noCameraPermissionText") {"No permission to access camera"} as String
+        } else if (TextUtils.equals(permissionArray?.get(0), Manifest.permission.RECORD_AUDIO)) {
+            uiStyle.getOrElse("noRecordAudioPermissionText") {"No permission to record audio"} as String
+        } else {
+            uiStyle.getOrElse("noAlbumPermissionText") {"No permission to access album"} as String
+        }
         val dialog = RemindDialog.buildDialog(fragment.context, message)
-        dialog.setButtonText(uiStyle.getOrElse("okText") { "OK" } as String)
+        dialog.setButtonText(uiStyle.getOrElse("okText") {"OK"} as String)
         dialog.setButtonTextColor(Color.parseColor("#007AFF"))
         dialog.setContentTextColor(Color.parseColor("#000000"))
         dialog.setOnDialogClickListener {
             dialog.dismiss()
-            PermissionUtil.goIntentSetting(fragment, requestCode)
+            PermissionUtil.goIntentSetting(fragment, requestCode);
         }
         dialog.setOnCancelListener {
-            PermissionUtil.goIntentSetting(fragment, requestCode)
+            PermissionUtil.goIntentSetting(fragment, requestCode);
         }
         dialog.show()
     }
 
     private fun showDialog(context: Context?, message: String) {
         val dialog = RemindDialog.buildDialog(context, message)
-        dialog.setButtonText(uiStyle.getOrElse("okText") { "OK" } as String)
+        dialog.setButtonText(uiStyle.getOrElse("okText") {"OK"} as String)
         dialog.setButtonTextColor(Color.parseColor("#007AFF"))
         dialog.setContentTextColor(Color.parseColor("#000000"))
         dialog.setOnDialogClickListener {
@@ -490,10 +433,7 @@ class HLImagePickerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     private fun openCropper() {
         val imagePath = flutterCall?.argument<String>("imagePath") ?: return
-        val inputUri =
-            if (PictureMimeType.isContent(imagePath)) Uri.parse(imagePath) else Uri.fromFile(
-                File(imagePath)
-            )
+        val inputUri = if (PictureMimeType.isContent(imagePath)) Uri.parse(imagePath) else Uri.fromFile(File(imagePath))
         val sandboxPath = getSandboxPath()
         if (sandboxPath == null) {
             mediaPickerResult?.error("CROPPER_ERROR", "Can't get output path", null)
@@ -501,15 +441,13 @@ class HLImagePickerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         }
         val compressQuality = flutterCall?.argument<Double>("cropCompressQuality") ?: 0.9
         val compressFormatStr = flutterCall?.argument<String>("cropCompressFormat")
-        val compressFormat =
-            if ("png" == compressFormatStr) Bitmap.CompressFormat.PNG else Bitmap.CompressFormat.JPEG
+        val compressFormat = if ("png" == compressFormatStr) Bitmap.CompressFormat.PNG else Bitmap.CompressFormat.JPEG
         val fileExt = if ("png" == compressFormatStr) ".png" else ".jpg"
         val destinationUri = Uri.fromFile(
-            File(getSandboxPath(), DateUtils.getCreateFileName("hl_image_picker_") + fileExt)
-        )
+            File(getSandboxPath(), DateUtils.getCreateFileName("hl_image_picker_") + fileExt))
         val uCrop = UCrop.of<Any>(inputUri, destinationUri)
         val options = UCrop.Options()
-        options.setToolbarTitle(uiStyle.getOrElse("cropTitleText") { "Cropper" } as String)
+        options.setToolbarTitle(uiStyle.getOrElse("cropTitleText") {"Cropper"} as String)
         options.setCompressionFormat(compressFormat)
         options.setCompressionQuality((compressQuality * 100).toInt())
         val aspectRatioX = flutterCall?.argument<Double>("ratioX")
@@ -538,7 +476,7 @@ class HLImagePickerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         uCrop.withOptions(options)
         val maxWidth = flutterCall?.argument<Int>("cropMaxWidth")
         val maxHeight = flutterCall?.argument<Int>("cropMaxHeight")
-        if (maxWidth != null && maxHeight != null) {
+        if(maxWidth != null && maxHeight != null) {
             uCrop.withMaxResultSize(maxWidth, maxHeight)
         }
         uCrop.setImageEngine(object : UCropImageEngine {
@@ -549,26 +487,16 @@ class HLImagePickerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 Glide.with(context).load(url).override(180, 180).into(imageView)
             }
 
-            override fun loadImage(
-                context: Context,
-                url: Uri,
-                maxWidth: Int,
-                maxHeight: Int,
-                call: UCropImageEngine.OnCallbackListener<Bitmap>
-            ) {
-                Glide.with(context).asBitmap().load(url).override(maxWidth, maxHeight)
-                    .into(object : CustomTarget<Bitmap?>() {
-                        override fun onResourceReady(
-                            resource: Bitmap,
-                            transition: Transition<in Bitmap?>?
-                        ) {
-                            call.onCall(resource)
-                        }
+            override fun loadImage(context: Context, url: Uri, maxWidth: Int, maxHeight: Int, call: UCropImageEngine.OnCallbackListener<Bitmap>) {
+                Glide.with(context).asBitmap().load(url).override(maxWidth, maxHeight).into(object : CustomTarget<Bitmap?>() {
+                    override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap?>?) {
+                        call.onCall(resource)
+                    }
 
-                        override fun onLoadCleared(placeholder: Drawable?) {
-                            call.onCall(null)
-                        }
-                    })
+                    override fun onLoadCleared(placeholder: Drawable?) {
+                        call.onCall(null)
+                    }
+                })
             }
         })
         currentActivity?.let { uCrop.start(it, CROPPER_RESULT_CODE) }
@@ -580,7 +508,7 @@ class HLImagePickerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             if (resultCode == Activity.RESULT_OK && data != null) {
                 val outputUri = UCrop.getOutput(data)
                 val imagePath = outputUri?.path
-                if (outputUri == null || imagePath == null) {
+                if(outputUri == null || imagePath == null) {
                     mediaPickerResult?.error("CROPPER_ERROR", "Crop error", null)
                     return true
                 }
@@ -621,21 +549,11 @@ class HLImagePickerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         return customFile.absolutePath + File.separator
     }
 
-    private fun getCompressFileEngine(
-        compressQuality: Double?,
-        compressFormat: String?,
-        maxWidth: Int?,
-        maxHeight: Int?
-    ): ImageFileCompressEngine? {
-        if (compressQuality == null && compressFormat == null && maxWidth == null && maxHeight == null) {
+    private fun getCompressFileEngine(compressQuality: Double?, compressFormat: String?, maxWidth: Int?, maxHeight: Int?): ImageFileCompressEngine? {
+        if(compressQuality == null && compressFormat == null && maxWidth == null && maxHeight == null) {
             return null
         }
-        return ImageFileCompressEngine(
-            compressQuality,
-            compressFormat,
-            maxWidth ?: 0,
-            maxHeight ?: 0
-        )
+        return ImageFileCompressEngine(compressQuality, compressFormat, maxWidth ?: 0, maxHeight ?: 0)
     }
 
     private fun getCropFileEngine(): ImageFileCropEngine? {
@@ -649,7 +567,7 @@ class HLImagePickerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             return null
         }
         val options = UCrop.Options()
-        options.setToolbarTitle(uiStyle.getOrElse("cropTitleText") { "Cropper" } as String)
+        options.setToolbarTitle(uiStyle.getOrElse("cropTitleText") {"Cropper"} as String)
         val aspectRatioX = flutterCall?.argument<Double>("ratioX")
         val aspectRatioY = flutterCall?.argument<Double>("ratioY")
         if (aspectRatioX != null && aspectRatioY != null) {
@@ -700,13 +618,8 @@ class HLImagePickerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         }
         val compressQuality = flutterCall?.argument<Double>("thumbnailCompressQuality") ?: 0.9
         val compressFormatStr = flutterCall?.argument<String>("thumbnailCompressFormat")
-        val compressFormat =
-            if ("png" == compressFormatStr) Bitmap.CompressFormat.PNG else Bitmap.CompressFormat.JPEG
-        return VideoThumbnailEventListener(
-            customFile.absolutePath + File.separator,
-            (compressQuality * 100).toInt(),
-            compressFormat
-        )
+        val compressFormat = if ("png" == compressFormatStr) Bitmap.CompressFormat.PNG else Bitmap.CompressFormat.JPEG
+        return VideoThumbnailEventListener(customFile.absolutePath + File.separator, (compressQuality * 100).toInt(), compressFormat)
     }
 
     private fun parseAspectRatio(name: String): AspectRatio {
